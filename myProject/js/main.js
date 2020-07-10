@@ -60,13 +60,15 @@ loadTable();
 setInterval(function () {
     count++;
     document.getElementById("hello_text").textContent = "はじめてのJavaScript(" + count + ")";
+    // ブロックが積み上がり切っていないかチェック
     if (hasFallingBlock()){
         fallBlocks();
     } else {
         deleteRow();
+        gameOver();
         generateBlock();
     }
-}, 1000);
+}, 100);
 
 /* ------ ここから下は関数の宣言部分 ------ */
 
@@ -84,9 +86,30 @@ function loadTable() {
 
 }
 
+function gameOver(){
+    var gameSet = false;
+    for (var row = 0; row < 2; row++){
+        for (var col = 0; col < 10; col++){
+            if (cells[row][col].className !== ""){
+                alert("game over");
+                gameSet = true;
+                break;
+            }
+        }
+    }
+    if (gameSet){
+        for (var row = 0; row < 20; row++){
+            for (var col = 0; col < 10; col++){
+                cells[row][col].className = "";
+                cells[row][col].blockNum = null;
+            }
+        }
+    }
+}
+
 function fallBlocks() {
     // 1.底についていないか？
-    for (var col = 0; i < 10; col++) {
+    for (var col = 0; col < 10; col++) {
         if (cells[19][col].blockNum === fallingBlockNum){
             isFalling = false;
             return;
@@ -126,17 +149,42 @@ function hasFallingBlock(){
 
 function deleteRow(){
     // そろっている行を消す
+    for (var row = 19; row >= 0; row--){
+        var canDelete = true;
+        for (var col = 0; col < 10; col++){
+            if (cells[row][col].className === ""){
+                canDelete = false;
+            }
+        }
+        if (canDelete){
+            // 1行消す
+            for (var col = 0; col < 10; col++){
+                cells[row][col].className = "";
+            }
+            // 上の行のブロックをすべて1マス落とす
+            var downRow = row;
+            downRow--;
+            for  (downRow; downRow >= 0; downRow--){
+                for (var col = 0; col < 10; col++){
+                    cells[downRow + 1][col].className = cells[downRow][col].className;
+                    cells[downRow + 1][col].blockNum = cells[downRow][col].blockNum;
+                    cells[downRow][col].className = "";
+                    cells[downRow][col].blockNum = null;
+                }
+            }
+        }
+    }
 }
 
 
 var fallingBlockNum = 0;
 function generateBlock(){
-    // ランダムにブロックを生成
-    // 1. ブロックパターンをランダムに1つ選ぶ
-    var keys = Object.keys(blocks);
-    var nextBlockKey = key[Math.floor(Math.random() * keys.length)];
-    var nextBlock = blocks[nextBlockKey];
-    var nextFallingBlockNum = fallingBlockNum + 1;
+  // ランダムにブロックを生成
+  // 1. ブロックパターンをランダムに1つ選ぶ
+  var keys = Object.keys(blocks);
+  var nextBlockKey = keys[Math.floor(Math.random() * keys.length)];
+  var nextBlock = blocks[nextBlockKey];
+  var nextFallingBlockNum = fallingBlockNum + 1;
 
     // 2.選んだパターンをもとにブロックを配置
     var pattern = nextBlock.pattern;
@@ -154,12 +202,49 @@ function generateBlock(){
     fallingBlockNum = nextFallingBlockNum;
 }
 
+
+
+
+
+
+// キーボードイベントを監視する
+document.addEventListener("keydown", onKeyDown);
+
+// A=65 W=87 S=83 D=68
+function onKeyDown(event){
+    if (event.keyCode === 65){
+        moveLeft();
+    } else if (event.keyCode === 68){
+        moveRight();
+    }
+}
+
 function moveRight(){
     // ブロックを右に移動させる
+    for (var row = 0; row < 20; row++){
+        for (var col = 9; col >= 0; col--){
+            if (cells[row][col].blockNum === fallingBlockNum){
+                cells[row][col + 1].className = cells[row][col].className;
+                cells[row][col + 1].blockNum = cells[row][col].blockNum;
+                cells[row][col].className = "";
+                cells[row][col].blockNum = null;
+            }
+        }
+    }
 }
 
 function moveLeft(){
     // ブロックを左に移動させる
+    for (var row = 0; row < 20; row++){
+        for (var col = 0; col < 10; col++){
+            if (cells[row][col].blockNum === fallingBlockNum){
+                cells[row][col - 1].className = cells[row][col].className;
+                cells[row][col - 1].blockNum = cells[row][col].blockNum;
+                cells[row][col].className = "";
+                cells[row][col].blockNum = null;
+            }
+        }
+    }
 }
 
 
