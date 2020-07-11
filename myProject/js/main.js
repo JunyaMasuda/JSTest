@@ -108,7 +108,7 @@ function gameOver(){
 }
 
 function fallBlocks() {
-    // 1.底についていないか？
+    // 1. 底についていないか？
     for (var col = 0; col < 10; col++) {
         if (cells[19][col].blockNum === fallingBlockNum){
             isFalling = false;
@@ -116,7 +116,7 @@ function fallBlocks() {
         }
     }
 
-    // 2.1マス下に別のブロックがないか？
+    // 2. 1マス下に別のブロックがないか？
     for (var row = 18; row >= 0; row--){
         for (var col = 0; col < 10; col++){
             if (cells[row][col].blockNum === fallingBlockNum){
@@ -221,27 +221,78 @@ function onKeyDown(event){
 
 function moveRight(){
     // ブロックを右に移動させる
+    var checkRight = true
+    // 1.壁に接していないか
+    for (var row = 0; row < 20; row++) {
+        if (cells[row][9].blockNum === fallingBlockNum){
+            checkRight = false;
+            return;
+        }
+    }
+
+    // 2. 1マス右に別のブロックがないか？
     for (var row = 0; row < 20; row++){
-        for (var col = 9; col >= 0; col--){
+        for (var col = 8; col >= 0; col--){
             if (cells[row][col].blockNum === fallingBlockNum){
-                cells[row][col + 1].className = cells[row][col].className;
-                cells[row][col + 1].blockNum = cells[row][col].blockNum;
-                cells[row][col].className = "";
-                cells[row][col].blockNum = null;
+                if (cells[row][col+1].className !== "" && cells[row][col+1].blockNum !== fallingBlockNum){
+                    checkRight = false;
+                    return;
+                }
+            }
+        }
+    }
+
+
+    // 操作中のミノを1マス右に動かす
+    if (checkRight){
+        for (var row = 0; row < 20; row++){
+            for (var col = 9; col >= 0; col--){
+                if (cells[row][col].blockNum === fallingBlockNum){
+                    cells[row][col + 1].className = cells[row][col].className;
+                    cells[row][col + 1].blockNum = cells[row][col].blockNum;
+                    cells[row][col].className = "";
+                    cells[row][col].blockNum = null;
+                }
             }
         }
     }
 }
 
+
 function moveLeft(){
     // ブロックを左に移動させる
+    var checkLeft = true
+    // 1.壁に接していないか
+    for (var row = 0; row < 20; row++) {
+        if (cells[row][0].blockNum === fallingBlockNum){
+            checkLeft = false;
+            return;
+        }
+    }
+
+    // 2. 1マス左に別のブロックがないか？
     for (var row = 0; row < 20; row++){
-        for (var col = 0; col < 10; col++){
+        for (var col = 1; col < 10; col++){
             if (cells[row][col].blockNum === fallingBlockNum){
-                cells[row][col - 1].className = cells[row][col].className;
-                cells[row][col - 1].blockNum = cells[row][col].blockNum;
-                cells[row][col].className = "";
-                cells[row][col].blockNum = null;
+                if (cells[row][col-1].className !== "" && cells[row][col-1].blockNum !== fallingBlockNum){
+                    checkLeft = false;
+                    return;
+                }
+            }
+        }
+    }
+
+
+    // ブロックを左に移動させる
+    if (checkLeft){
+        for (var row = 0; row < 20; row++){
+            for (var col = 0; col < 10; col++){
+                if (cells[row][col].blockNum === fallingBlockNum){
+                    cells[row][col - 1].className = cells[row][col].className;
+                    cells[row][col - 1].blockNum = cells[row][col].blockNum;
+                    cells[row][col].className = "";
+                    cells[row][col].blockNum = null;
+                }
             }
         }
     }
